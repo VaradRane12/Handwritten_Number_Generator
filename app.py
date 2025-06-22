@@ -69,7 +69,7 @@ def generate_digit(model, digit, n=5):
         return samples.view(-1, 28, 28)
 
 # Streamlit UI
-st.title("🧠 Generate MNIST Digits with CVAE")
+st.title("Generate MNIST Digits with CVAE")
 st.markdown("Select a digit (0–9) to generate 5 handwritten versions using your trained model.")
 
 digit = st.selectbox("Choose a digit to generate:", list(range(10)))
