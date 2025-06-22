@@ -1,7 +1,51 @@
 import streamlit as st
 import torch
 import matplotlib.pyplot as plt
-from train_model import CVAE, one_hot  # Make sure this matches your training script
+from torch.nn import nn
+def one_hot(labels, num_classes=10):
+    return torch.eye(num_classes)[labels].to(device)
+
+# CVAE model
+class CVAE(nn.Module):
+    def __init__(self, latent_dim=45, num_classes=10):
+        super(CVAE, self).__init__()
+        self.latent_dim = latent_dim
+        self.num_classes = num_classes
+
+        input_dim = 784 + num_classes  # input image + label
+
+        # Encoder
+        self.fc1 = nn.Linear(input_dim, 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3_mu = nn.Linear(256, latent_dim)
+        self.fc3_logvar = nn.Linear(256, latent_dim)
+
+        # Decoder
+        self.fc4 = nn.Linear(latent_dim + num_classes, 256)
+        self.fc5 = nn.Linear(256, 512)
+        self.fc6 = nn.Linear(512, 784)
+
+    def encode(self, x, y):
+        x = torch.cat([x, y], dim=1)
+        h = F.relu(self.fc1(x))
+        h = F.relu(self.fc2(h))
+        return self.fc3_mu(h), self.fc3_logvar(h)
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def decode(self, z, y):
+        z = torch.cat([z, y], dim=1)
+        h = F.relu(self.fc4(z))
+        h = F.relu(self.fc5(h))
+        return torch.sigmoid(self.fc6(h))
+
+    def forward(self, x, y):
+        mu, logvar = self.encode(x, y)
+        z = self.reparameterize(mu, logvar)
+        return self.decode(z, y), mu, logvar
 
 # Constants
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
