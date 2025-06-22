@@ -1,6 +1,8 @@
 import streamlit as st
 import torch
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
+
 from torch import nn
 def one_hot(labels, num_classes=10):
     return torch.eye(num_classes)[labels].to(device)
