@@ -6,22 +6,16 @@ import numpy as np
 import torch.nn as nn
 
 class CVAE(nn.Module):
-    def __init__(self, latent_dim=20):
+    def __init__(self, latent_dim=45):
         super(CVAE, self).__init__()
-        self.latent_dim = latent_dim
-        self.fc3 = nn.Linear(latent_dim + 10, 256)
-        self.fc4 = nn.Linear(256, 512)
-        self.fc5 = nn.Linear(512, 784)
-
-    def decode(self, z, y):
-        x = torch.cat([z, y], dim=1)
-        h3 = F.relu(self.fc3(x))
-        h4 = F.relu(self.fc4(h3))
-        return torch.sigmoid(self.fc5(h4))
-
+        self.fc1 = nn.Linear(28 * 28 + 10, 400)
+        self.fc21 = nn.Linear(400, latent_dim)
+        self.fc22 = nn.Linear(400, latent_dim)
+        self.fc3 = nn.Linear(latent_dim + 10, 400)
+        self.fc4 = nn.Linear(400, 28 * 28)
 
     def encode(self, x, y):
-        h1 = F.relu(self.fc1(torch.cat([x, y], 1)))
+        h1 = torch.relu(self.fc1(torch.cat([x, y], dim=1)))
         return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
@@ -30,7 +24,7 @@ class CVAE(nn.Module):
         return mu + eps * std
 
     def decode(self, z, y):
-        h3 = F.relu(self.fc3(torch.cat([z, y], 1)))
+        h3 = torch.relu(self.fc3(torch.cat([z, y], dim=1)))
         return torch.sigmoid(self.fc4(h3))
 
     def forward(self, x, y):
