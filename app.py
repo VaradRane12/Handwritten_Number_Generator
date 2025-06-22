@@ -4,14 +4,20 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import numpy as np
 
-class CVAE(torch.nn.Module):
-    def __init__(self):
+class CVAE(nn.Module):
+    def __init__(self, latent_dim=20):
         super(CVAE, self).__init__()
-        self.fc1 = torch.nn.Linear(784 + 10, 400)
-        self.fc21 = torch.nn.Linear(400, 45)
-        self.fc22 = torch.nn.Linear(400, 45)
-        self.fc3 = torch.nn.Linear(45 + 10, 400)
-        self.fc4 = torch.nn.Linear(400, 784)
+        self.latent_dim = latent_dim
+        self.fc3 = torch.nn.Linear(latent_dim + 10, 256)
+        self.fc4 = torch.nn.Linear(256, 512)
+        self.fc5 = torch.nn.Linear(512, 784)
+
+    def decode(self, z, y):
+        x = torch.cat([z, y], dim=1)
+        h3 = F.relu(self.fc3(x))
+        h4 = F.relu(self.fc4(h3))
+        return torch.sigmoid(self.fc5(h4))
+
 
     def encode(self, x, y):
         h1 = F.relu(self.fc1(torch.cat([x, y], 1)))
