@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import numpy as np
 
-class CVAE(nn.Module):
+class CVAE(torch.nn.Module):
     def __init__(self, latent_dim=20):
         super(CVAE, self).__init__()
         self.latent_dim = latent_dim
